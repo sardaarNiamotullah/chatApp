@@ -4,7 +4,6 @@ import dev.sardaar.backend_springboot.dto.LogInDTO;
 import dev.sardaar.backend_springboot.dto.RegisterDTO;
 import dev.sardaar.backend_springboot.entity.User;
 import dev.sardaar.backend_springboot.repository.UserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
