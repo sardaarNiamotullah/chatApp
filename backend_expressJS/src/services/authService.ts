@@ -1,4 +1,9 @@
 import prisma from "../config/database";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+
+const SECRET_KEY = "your_secret_key"; // Use an env variable in production
+const SALT_ROUNDS = 10;
 
 export const registerUser = async (
   username: string,
@@ -7,23 +12,30 @@ export const registerUser = async (
   firstName: string,
   lastName?: string
 ) => {
+  // Hash the password before storing
+  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+
   return prisma.user.create({
-    data: { username, email, password, firstName, lastName },
+    data: { username, email, password: hashedPassword, firstName, lastName },
   });
 };
 
 export const loginUser = async (identifier: string, password: string) => {
-  // Find user by ID, username, or email
+  // Find user by username or email
   const user = await prisma.user.findFirst({
     where: {
-      OR: [{ id: identifier }, { username: identifier }, { email: identifier }],
+      OR: [{ username: identifier }, { email: identifier }],
     },
   });
 
   if (!user) throw new Error("Invalid Identifier");
 
-  // Check if password matches (direct comparison)
-  if (user.password !== password) throw new Error("Wrong Password");
+  // Compare the hashed password
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) throw new Error("Wrong Password");
 
-  return user;
+  // Generate JWT token
+  const token = jwt.sign({ userId: user.id, username: user.username }, SECRET_KEY, { expiresIn: "1h" });
+
+  return { token, user };
 };

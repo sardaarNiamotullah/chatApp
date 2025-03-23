@@ -22,4 +22,28 @@ model User {
   lastName  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  sentMessages     Message[] @relation(name: "SentMessages")
+  receivedMessages Message[] @relation(name: "ReceivedMessages")
 }
+
+model Message {
+  id               String   @id @default(uuid())
+  senderUsername   String
+  receiverUsername String
+  text             String
+  status           Status   @default(SENT)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  sender   User @relation(name: "SentMessages", fields: [senderUsername], references: [username])
+  receiver User @relation(name: "ReceivedMessages", fields: [receiverUsername], references: [username])
+}
+
+enum Status {
+  SENT
+  RECEIVED
+  SEEN
+}
+
+

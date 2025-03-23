@@ -17,14 +17,13 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
+
 export const loginUser = async (req: Request, res: Response) => {
   try {
-    const { identifier, password } = req.body; // identifier can be ID, username, or email
-    const user = await authService.loginUser(identifier, password);
-
-    res.json(user);
+    const { identifier, password } = req.body;
+    const { token, user } = await authService.loginUser(identifier, password);
+    res.json({ token, user });
   } catch (error: any) {
-    res.status(401).json({ error: error.message || "Login failed" });
+    res.status(400).json({ error: error.message || "Error logging in" });
   }
 };
-
