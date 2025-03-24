@@ -23,8 +23,10 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sentMessages     Message[] @relation(name: "SentMessages")
-  receivedMessages Message[] @relation(name: "ReceivedMessages")
+  sentMessages     Message[]    @relation(name: "SentMessages")
+  receivedMessages Message[]    @relation(name: "ReceivedMessages")
+  connectionsA     Connection[] @relation(name: "UserAConnections")
+  connectionsB     Connection[] @relation(name: "UserBConnections")
 }
 
 model Message {
@@ -40,10 +42,27 @@ model Message {
   receiver User @relation(name: "ReceivedMessages", fields: [receiverUsername], references: [username])
 }
 
+model Connection {
+  id            String           @id @default(uuid())
+  userA         User             @relation(name: "UserAConnections", fields: [userAUsername], references: [username])
+  userB         User             @relation(name: "UserBConnections", fields: [userBUsername], references: [username])
+  userAUsername String
+  userBUsername String
+  status        ConnectionStatus @default(PENDING) // Tracks request status
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  @@unique([userAUsername, userBUsername])
+}
+
 enum Status {
   SENT
   RECEIVED
   SEEN
 }
 
-
+enum ConnectionStatus {
+  PENDING // Request sent but not yet accepted
+  ACCEPTED // Request accepted, users are now friends
+  DELETED // Friend request rejected or friendship removed
+}

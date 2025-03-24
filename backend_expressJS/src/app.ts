@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/authRoutes";
 import userRoutes from "./routes/userRoutes";
 import messageRoutes from "./routes/messageRoutes";
+import connectionRoutes from "./routes/connectionRoutes";
 import { authenticateJWT } from "./middlewares/authMiddleware";
 
 dotenv.config();
@@ -20,5 +21,7 @@ app.use(authenticateJWT);
 
 app.use("/api", userRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/connections", connectionRoutes);
+
 
 export default app;

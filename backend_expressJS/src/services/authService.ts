@@ -15,10 +15,17 @@ export const registerUser = async (
   // Hash the password before storing
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-  return prisma.user.create({
+  // Create user
+  const user = await prisma.user.create({
     data: { username, email, password: hashedPassword, firstName, lastName },
   });
+
+  // Generate JWT token for the new user
+  const token = jwt.sign({ userId: user.id, username: user.username }, SECRET_KEY, { expiresIn: "1h" });
+
+  return { token, user }; // Return the token along with user details
 };
+
 
 export const loginUser = async (identifier: string, password: string) => {
   // Find user by username or email
