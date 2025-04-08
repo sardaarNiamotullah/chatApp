@@ -21,7 +21,7 @@ export const registerUser = async (
   });
 
   // Generate JWT token for the new user
-  const token = jwt.sign({ userId: user.id, username: user.username }, SECRET_KEY, { expiresIn: "1h" });
+  const token = jwt.sign({ id: user.id, username: user.username, email: user.email }, SECRET_KEY, { expiresIn: "1h" });
 
   return { token, user }; // Return the token along with user details
 };
@@ -42,7 +42,7 @@ export const loginUser = async (identifier: string, password: string) => {
   if (!isPasswordValid) throw new Error("Wrong Password");
 
   // Generate JWT token
-  const token = jwt.sign({ userId: user.id, username: user.username }, SECRET_KEY, { expiresIn: "1h" });
+  const token = jwt.sign({ id: user.id, username: user.username, email: user.email }, SECRET_KEY, { expiresIn: "1h" });
 
   return { token, user };
 };

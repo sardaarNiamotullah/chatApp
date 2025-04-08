@@ -25,6 +25,8 @@ export const authenticateJWT = (
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     (req as any).user = decoded; // Attach decoded user data to request
+    // Log the decoded user details to console
+    console.log("Authenticated User Details:", decoded);
     next(); // Call next middleware if successful
   } catch (err) {
     res.status(403).json({ error: "Invalid or expired token" });

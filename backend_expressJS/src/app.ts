@@ -14,14 +14,13 @@ app.use(express.json());
 app.use(cors());
 
 // Routes without any authentications.
-app.use("/api", authRoutes);
+app.use("/api/auth", authRoutes);
 
 // Apply authentication middleware globally
 app.use(authenticateJWT);
 
-app.use("/api", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/connections", connectionRoutes);
-
 
 export default app;

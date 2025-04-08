@@ -1,14 +1,68 @@
 import prisma from "../config/database";
 import { ConnectionStatus } from "@prisma/client";
 
-export const getConnections = async (username: string) => {
-  return prisma.connection.findMany({
+// export const getConnections = async (username: string) => {
+//   return prisma.connection.findMany({
+//     where: {
+//       OR: [{ userAUsername: username }, { userBUsername: username }],
+//       status: ConnectionStatus.ACCEPTED,
+//     },
+//   });
+// };
+
+export const getConnections = async (currentUsername: string) => {
+  // Step 1: Only fetch ACCEPTED connections involving the current user
+  const connections = await prisma.connection.findMany({
     where: {
-      OR: [{ userAUsername: username }, { userBUsername: username }],
-      status: ConnectionStatus.ACCEPTED,
+      status: 'ACCEPTED',
+      OR: [
+        { userAUsername: currentUsername },
+        { userBUsername: currentUsername },
+      ],
     },
   });
+
+  // Step 2: Map to list of other users with status
+  const connectionMap = connections.map(conn => {
+    const otherUsername =
+      conn.userAUsername === currentUsername
+        ? conn.userBUsername
+        : conn.userAUsername;
+
+    return {
+      username: otherUsername,
+      status: conn.status, // dynamic: will always be "ACCEPTED" in this case
+    };
+  });
+
+  const otherUsernames = connectionMap.map(c => c.username);
+
+  // Step 3: Get user details
+  const users = await prisma.user.findMany({
+    where: {
+      username: {
+        in: otherUsernames,
+      },
+    },
+    select: {
+      username: true,
+      firstName: true,
+      lastName: true,
+    },
+  });
+
+  // Step 4: Merge user info with status
+  return users.map(user => {
+    const connection = connectionMap.find(c => c.username === user.username);
+    return {
+      username: user.username,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      status: connection?.status || null, // should always be "ACCEPTED" here
+    };
+  });
 };
+
 
 export const areConnected = async (userAUsername: string, userBUsername: string) => {
   const connection = await prisma.connection.findFirst({
@@ -55,6 +109,25 @@ export const sendConnectionRequest = async (userAUsername: string, userBUsername
   });
 };
 
+export const cancelConnectionRequest = async (userAUsername: string, userBUsername: string) => {
+  const existingConnection = await prisma.connection.findFirst({
+    where: {
+      userAUsername,
+      userBUsername,
+      status: "PENDING", // Only allow canceling pending requests
+    },
+  });
+
+  if (!existingConnection) {
+    throw new Error("No pending connection request found.");
+  }
+
+  return prisma.connection.delete({
+    where: { id: existingConnection.id },
+  });
+};
+
+
 export const acceptConnectionRequest = async (userAUsername: string, userBUsername: string) => {
   const connection = await prisma.connection.findFirst({
     where: { userAUsername: userBUsername, userBUsername: userAUsername, status: ConnectionStatus.PENDING },
@@ -70,12 +143,30 @@ export const acceptConnectionRequest = async (userAUsername: string, userBUserna
   });
 };
 
-export const deleteConnection = async (userAUsername: string, userBUsername: string) => {
+// export const deleteConnection = async (userAUsername: string, userBUsername: string) => {
+//   const connection = await prisma.connection.findFirst({
+//     where: {
+//       OR: [
+//         { userAUsername, userBUsername },
+//         { userAUsername: userBUsername, userBUsername: userAUsername },
+//       ],
+//     },
+//   });
+
+//   if (!connection) {
+//     throw new Error("No connection found.");
+//   }
+
+//   return prisma.connection.delete({
+//     where: { id: connection.id },
+//   });
+// };
+export const deleteConnection = async (currentUsername: string, otherUsername: string) => {
   const connection = await prisma.connection.findFirst({
     where: {
       OR: [
-        { userAUsername, userBUsername },
-        { userAUsername: userBUsername, userBUsername: userAUsername },
+        { userAUsername: currentUsername, userBUsername: otherUsername },
+        { userAUsername: otherUsername, userBUsername: currentUsername },
       ],
     },
   });
@@ -86,5 +177,18 @@ export const deleteConnection = async (userAUsername: string, userBUsername: str
 
   return prisma.connection.delete({
     where: { id: connection.id },
+  });
+};
+
+
+export const getConnectionRequests = async (username: string) => {
+  return prisma.connection.findMany({
+    where: {
+      userBUsername: username, // Fetch requests where the user is the recipient
+      status: ConnectionStatus.PENDING,
+    },
+    include: {
+      userA: true, // This will fetch the full details of userA
+    },
   });
 };
