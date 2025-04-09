@@ -1,15 +1,6 @@
 import prisma from "../config/database";
 import { ConnectionStatus } from "@prisma/client";
 
-// export const getConnections = async (username: string) => {
-//   return prisma.connection.findMany({
-//     where: {
-//       OR: [{ userAUsername: username }, { userBUsername: username }],
-//       status: ConnectionStatus.ACCEPTED,
-//     },
-//   });
-// };
-
 export const getConnections = async (currentUsername: string) => {
   // Step 1: Only fetch ACCEPTED connections involving the current user
   const connections = await prisma.connection.findMany({
@@ -143,24 +134,6 @@ export const acceptConnectionRequest = async (userAUsername: string, userBUserna
   });
 };
 
-// export const deleteConnection = async (userAUsername: string, userBUsername: string) => {
-//   const connection = await prisma.connection.findFirst({
-//     where: {
-//       OR: [
-//         { userAUsername, userBUsername },
-//         { userAUsername: userBUsername, userBUsername: userAUsername },
-//       ],
-//     },
-//   });
-
-//   if (!connection) {
-//     throw new Error("No connection found.");
-//   }
-
-//   return prisma.connection.delete({
-//     where: { id: connection.id },
-//   });
-// };
 export const deleteConnection = async (currentUsername: string, otherUsername: string) => {
   const connection = await prisma.connection.findFirst({
     where: {

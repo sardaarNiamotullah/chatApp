@@ -15,16 +15,35 @@ export const sendMessage = async (
   });
 };
 
-export const getConversation = async (user1: string, user2: string) => {
+export const getConversation = async (
+  currentUsername: string,
+  otherUsername: string
+) => {
   return prisma.message.findMany({
     where: {
       OR: [
-        { senderUsername: user1, receiverUsername: user2 },
-        { senderUsername: user2, receiverUsername: user1 },
+        // Messages where current user is sender and other user is receiver
+        {
+          senderUsername: currentUsername,
+          receiverUsername: otherUsername,
+        },
+        // Messages where current user is receiver and other user is sender
+        {
+          senderUsername: otherUsername,
+          receiverUsername: currentUsername,
+        },
       ],
     },
     orderBy: {
-      createdAt: "asc",
+      createdAt: "asc", // Oldest first, use "desc" for newest first
+    },
+    select: {
+      id: true,
+      text: true,
+      status: true,
+      createdAt: true,
+      senderUsername: true,
+      receiverUsername: true,
     },
   });
 };
