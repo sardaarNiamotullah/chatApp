@@ -5,7 +5,7 @@ export const getConnections = async (currentUsername: string) => {
   // Step 1: Only fetch ACCEPTED connections involving the current user
   const connections = await prisma.connection.findMany({
     where: {
-      status: 'ACCEPTED',
+      status: "ACCEPTED",
       OR: [
         { userAUsername: currentUsername },
         { userBUsername: currentUsername },
@@ -14,7 +14,7 @@ export const getConnections = async (currentUsername: string) => {
   });
 
   // Step 2: Map to list of other users with status
-  const connectionMap = connections.map(conn => {
+  const connectionMap = connections.map((conn) => {
     const otherUsername =
       conn.userAUsername === currentUsername
         ? conn.userBUsername
@@ -26,7 +26,7 @@ export const getConnections = async (currentUsername: string) => {
     };
   });
 
-  const otherUsernames = connectionMap.map(c => c.username);
+  const otherUsernames = connectionMap.map((c) => c.username);
 
   // Step 3: Get user details
   const users = await prisma.user.findMany({
@@ -43,8 +43,8 @@ export const getConnections = async (currentUsername: string) => {
   });
 
   // Step 4: Merge user info with status
-  return users.map(user => {
-    const connection = connectionMap.find(c => c.username === user.username);
+  return users.map((user) => {
+    const connection = connectionMap.find((c) => c.username === user.username);
     return {
       username: user.username,
       firstName: user.firstName,
@@ -54,8 +54,10 @@ export const getConnections = async (currentUsername: string) => {
   });
 };
 
-
-export const areConnected = async (userAUsername: string, userBUsername: string) => {
+export const areConnected = async (
+  userAUsername: string,
+  userBUsername: string
+) => {
   const connection = await prisma.connection.findFirst({
     where: {
       OR: [
@@ -69,11 +71,14 @@ export const areConnected = async (userAUsername: string, userBUsername: string)
   return !!connection;
 };
 
-export const sendConnectionRequest = async (userAUsername: string, userBUsername: string) => {
+export const sendConnectionRequest = async (
+  userAUsername: string,
+  userBUsername: string
+) => {
   if (userAUsername === userBUsername) {
     throw new Error("You cannot send a connection request to yourself.");
   }
-  
+
   const existingConnection = await prisma.connection.findFirst({
     where: {
       OR: [
@@ -100,7 +105,10 @@ export const sendConnectionRequest = async (userAUsername: string, userBUsername
   });
 };
 
-export const cancelConnectionRequest = async (userAUsername: string, userBUsername: string) => {
+export const cancelConnectionRequest = async (
+  userAUsername: string,
+  userBUsername: string
+) => {
   const existingConnection = await prisma.connection.findFirst({
     where: {
       userAUsername,
@@ -118,10 +126,16 @@ export const cancelConnectionRequest = async (userAUsername: string, userBUserna
   });
 };
 
-
-export const acceptConnectionRequest = async (userAUsername: string, userBUsername: string) => {
+export const acceptConnectionRequest = async (
+  userAUsername: string,
+  userBUsername: string
+) => {
   const connection = await prisma.connection.findFirst({
-    where: { userAUsername: userBUsername, userBUsername: userAUsername, status: ConnectionStatus.PENDING },
+    where: {
+      userAUsername: userBUsername,
+      userBUsername: userAUsername,
+      status: ConnectionStatus.PENDING,
+    },
   });
 
   if (!connection) {
@@ -134,7 +148,10 @@ export const acceptConnectionRequest = async (userAUsername: string, userBUserna
   });
 };
 
-export const deleteConnection = async (currentUsername: string, otherUsername: string) => {
+export const deleteConnection = async (
+  currentUsername: string,
+  otherUsername: string
+) => {
   const connection = await prisma.connection.findFirst({
     where: {
       OR: [
@@ -152,7 +169,6 @@ export const deleteConnection = async (currentUsername: string, otherUsername: s
     where: { id: connection.id },
   });
 };
-
 
 export const getConnectionRequests = async (username: string) => {
   return prisma.connection.findMany({

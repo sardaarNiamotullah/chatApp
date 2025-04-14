@@ -5,19 +5,23 @@ import * as messageService from "../services/messageService";
 const userSocketMap = new Map<string, string>();
 
 export const handleSocketConnection = (socket: Socket, io: Server) => {
-  console.log("🟢 New client connected:", socket.id);
+  // console.log("🟢 New client connected:", socket.id);
 
   // 1️⃣ Client sends username after connecting
   socket.on("register", (username: string) => {
     userSocketMap.set(username, socket.id);
-    console.log(`👤 ${username} registered with socket ID ${socket.id}`);
+    // console.log(`👤 ${username} registered with socket ID ${socket.id}`);
   });
 
   // 2️⃣ When a message is sent
   socket.on("send_message", async (data) => {
     const { senderUsername, receiverUsername, text } = data;
 
-    const message = await messageService.sendMessage(senderUsername, receiverUsername, text);
+    const message = await messageService.sendMessage(
+      senderUsername,
+      receiverUsername,
+      text
+    );
 
     const receiverSocketId = userSocketMap.get(receiverUsername);
 
@@ -34,7 +38,7 @@ export const handleSocketConnection = (socket: Socket, io: Server) => {
     for (const [username, id] of userSocketMap.entries()) {
       if (id === socket.id) {
         userSocketMap.delete(username);
-        console.log(`🔴 ${username} disconnected and removed from map.`);
+        // console.log(`🔴 ${username} disconnected and removed from map.`);
         break;
       }
     }

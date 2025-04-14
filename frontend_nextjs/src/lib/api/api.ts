@@ -180,6 +180,7 @@ export const acceptConnectionRequest = async (userBUsername: string) => {
 export const deleteConnectionRequest = async (userBUsername: string) => {
   const token = getAuthToken();
 
+  console.log(`inside api here userBusername is: ${userBUsername}`);
   try {
     const response = await fetch(`${API_URL}/connections/delete`, {
       method: "POST",

@@ -62,10 +62,8 @@ export const acceptRequest = async (req: Request, res: Response) => {
 export const deleteConnection = async (req: Request, res: Response) => {
   try {
     const currentUsername = (req as any).user.username;
-    const { username: otherUsername } = req.body;
-
+    const { userBUsername: otherUsername } = req.body;
     await connectionService.deleteConnection(currentUsername, otherUsername);
-
     res.json({ message: "Connection deleted successfully." });
   } catch (error: any) {
     res.status(400).json({ error: error.message });

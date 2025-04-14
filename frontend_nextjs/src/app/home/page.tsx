@@ -87,6 +87,7 @@ export default function UsersPage() {
   };
 
   const handleDeleteRequest = async (username: string) => {
+    console.log(`username provided in pagetsx is: ${username}`);
     try {
       await deleteConnectionRequest(username);
       await loadData();
@@ -94,6 +95,7 @@ export default function UsersPage() {
       console.error("Error deleting request:", error);
     }
   };
+
   const handleConnectionsClick = () => {
     router.push("/connection");
   };
@@ -135,18 +137,18 @@ export default function UsersPage() {
                   {user.firstName} {user.lastName}
                 </p>
               </div>
-              <div className="flex space-x-2">
+              <div className="flex space-x-2 w-36">
                 <button
                   onClick={() => handleAcceptRequest(user.username)}
-                  className="px-4 py-1 bg-green-500 text-white rounded"
+                  className="px-3 py-1 bg-green-500 text-white rounded text-sm flex-1"
                 >
                   Accept
                 </button>
                 <button
                   onClick={() => handleDeleteRequest(user.username)}
-                  className="px-3 py-1 bg-red-500 text-white rounded"
+                  className="px-3 py-1 bg-red-500 text-white rounded text-sm flex-1"
                 >
-                  ✕
+                  Delete
                 </button>
               </div>
             </div>
@@ -172,14 +174,14 @@ export default function UsersPage() {
             {user.status === "PENDING" ? (
               <button
                 onClick={() => handleCancelRequest(user.username)}
-                className="px-4 py-1 bg-red-500 text-white rounded"
+                className="px-3 py-1 bg-red-500 text-white rounded text-sm whitespace-nowrap w-36"
               >
                 Cancel Request
               </button>
             ) : (
               <button
                 onClick={() => handleSendRequest(user.username)}
-                className="px-4 py-1 bg-blue-500 text-white rounded"
+                className="px-3 py-1 bg-blue-500 text-white rounded text-sm whitespace-nowrap w-36"
               >
                 Send Request
               </button>
