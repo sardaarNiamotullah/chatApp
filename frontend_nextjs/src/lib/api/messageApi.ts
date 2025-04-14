@@ -1,6 +1,6 @@
 import { getAuthToken } from "./auth";
 
-const API_HOST = "192.168.101.54"; // Your PC's IP address
+const API_HOST = "localhost"; // Your PC's IP address
 export const API_URL = `http://${API_HOST}:8000/api`; // Backend URL
 
 // Send a message to another user

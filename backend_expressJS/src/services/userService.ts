@@ -52,25 +52,99 @@ export const deleteUser = async (identifier: string) => {
   });
 };
 
+// export const getUsersExcludingRequestSenders = async (currentUsername: string) => {
+//   // Step 1: Get usernames who sent a request to the current user
+//   const sentToMeConnections = await prisma.connection.findMany({
+//     where: {
+//       userBUsername: currentUsername,
+//     },
+//     select: {
+//       userAUsername: true,
+//     },
+//   });
+
+//   const excludedUsernames = sentToMeConnections.map(conn => conn.userAUsername);
+//   excludedUsernames.push(currentUsername); // exclude self too
+
+//   // Step 2: Get users not in that list
+//   const users = await prisma.user.findMany({
+//     where: {
+//       username: {
+//         notIn: excludedUsernames,
+//       },
+//     },
+//     select: {
+//       username: true,
+//       firstName: true,
+//       lastName: true,
+//       // Join connection where current user sent request to this user
+//       connectionsB: {
+//         where: {
+//           userAUsername: currentUsername,
+//         },
+//         select: {
+//           status: true,
+//         },
+//       },
+//     },
+//   });
+
+//   // Step 3: Format output
+//   return users.map(user => ({
+//     username: user.username,
+//     firstName: user.firstName,
+//     lastName: user.lastName,
+//     status: user.connectionsB[0]?.status || null,
+//   }));
+// };
+
 export const getUsersExcludingRequestSenders = async (currentUsername: string) => {
-  // Step 1: Get usernames who sent a request to the current user
-  const sentToMeConnections = await prisma.connection.findMany({
+  // Step 1: Get usernames who sent a request to the current user OR are already friends
+  const connectionsToExclude = await prisma.connection.findMany({
     where: {
-      userBUsername: currentUsername,
+      OR: [
+        // Users who sent requests to current user
+        { userBUsername: currentUsername },
+        // Users who are already friends with current user (either direction)
+        {
+          OR: [
+            {
+              userAUsername: currentUsername,
+              status: 'ACCEPTED'
+            },
+            {
+              userBUsername: currentUsername,
+              status: 'ACCEPTED'
+            }
+          ]
+        }
+      ]
     },
     select: {
       userAUsername: true,
+      userBUsername: true,
     },
   });
 
-  const excludedUsernames = sentToMeConnections.map(conn => conn.userAUsername);
-  excludedUsernames.push(currentUsername); // exclude self too
+  // Collect all usernames to exclude
+  const excludedUsernames = new Set<string>();
+  excludedUsernames.add(currentUsername); // exclude self
+  
+  connectionsToExclude.forEach(conn => {
+    // Add the other user in each connection (whichever isn't the current user)
+    if (conn.userAUsername !== currentUsername) {
+      excludedUsernames.add(conn.userAUsername);
+    }
+    if (conn.userBUsername !== currentUsername) {
+      excludedUsernames.add(conn.userBUsername);
+    }
+  });
 
-  // Step 2: Get users not in that list
+  // Step 2: Get users not in the excluded list
   const users = await prisma.user.findMany({
     where: {
       username: {
-        notIn: excludedUsernames,
+        notIn: Array.from(excludedUsernames),
       },
     },
     select: {

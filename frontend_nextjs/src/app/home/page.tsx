@@ -114,36 +114,50 @@ export default function UsersPage() {
 
       {/* User List */}
       <div className="flex-1 overflow-auto p-4">
+        {/* Connection Requests Banner */}
+        <div className="bg-gray-800 text-white p-2 mb-2 rounded">
+          <h2 className="text-lg font-semibold">Connection Request Box</h2>
+        </div>
         {/* Connection Requests */}
-        {requests.map((user) => (
-          <div
-            key={`request-${user.username}`}
-            className="flex justify-between items-center border-b border-gray-700 p-3"
-          >
-            <div>
-              <p className="text-sm text-gray-400">@{user.username}</p>
-              <p className="text-lg">
-                {user.firstName} {user.lastName}
-              </p>
+        {requests.length === 0 ? (
+          <p className="text-gray-400 mb-4">
+            Currently you do not have any connection requests.
+          </p>
+        ) : (
+          requests.map((user) => (
+            <div
+              key={`request-${user.username}`}
+              className="flex justify-between items-center border-b border-gray-700 p-3"
+            >
+              <div>
+                <p className="text-sm text-gray-400">@{user.username}</p>
+                <p className="text-lg">
+                  {user.firstName} {user.lastName}
+                </p>
+              </div>
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => handleAcceptRequest(user.username)}
+                  className="px-4 py-1 bg-green-500 text-white rounded"
+                >
+                  Accept
+                </button>
+                <button
+                  onClick={() => handleDeleteRequest(user.username)}
+                  className="px-3 py-1 bg-red-500 text-white rounded"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => handleAcceptRequest(user.username)}
-                className="px-4 py-1 bg-green-500 text-white rounded"
-              >
-                Accept
-              </button>
-              <button
-                onClick={() => handleDeleteRequest(user.username)}
-                className="px-3 py-1 bg-red-500 text-white rounded"
-              >
-                ✕
-              </button>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
 
         {/* Normal Users */}
+        {/* Normal Users Banner */}
+        <div className="bg-gray-800 text-white p-2 mt-4 mb-2 rounded">
+          <h2 className="text-lg font-semibold">Explore Other Users</h2>
+        </div>
         {users.map((user) => (
           <div
             key={`user-${user.username}`}

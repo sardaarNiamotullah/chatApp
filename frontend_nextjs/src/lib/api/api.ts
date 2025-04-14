@@ -1,12 +1,11 @@
 import { getAuthToken } from "./auth";
 
-const API_HOST = "192.168.101.54"; // Your PC's IP address
+const API_HOST = "localhost"; // Your PC's IP address
 export const API_URL = `http://${API_HOST}:8000/api`; // Backend URL
 
 // Fetch logged-in user's own profile
 export const fetchOwnProfile = async () => {
   const token = getAuthToken();
-
   try {
     const response = await fetch(`${API_URL}/users/me`, {
       headers: {
