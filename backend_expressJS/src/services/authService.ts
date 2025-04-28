@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 const SECRET_KEY = "your_secret_key"; // Use an env variable in production
+// const SECRET_KEY = process.env.JWT_SECRET!;
 const SALT_ROUNDS = 10;
 
 export const registerUser = async (
@@ -45,4 +46,14 @@ export const loginUser = async (identifier: string, password: string) => {
   const token = jwt.sign({ id: user.id, username: user.username, email: user.email }, SECRET_KEY, { expiresIn: "1h" });
 
   return { token, user };
+};
+
+//newly added code
+
+export const generateToken = (user: { id: string; email: string; username: string }) => {
+  return jwt.sign(
+    { id: user.id, email: user.email, username: user.username },
+    SECRET_KEY,
+    { expiresIn: "24h" }
+  );
 };

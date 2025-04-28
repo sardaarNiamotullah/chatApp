@@ -1,5 +1,7 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+
 import { useEffect, useState } from "react";
 import {
   fetchConnectionRequests,
@@ -28,6 +30,7 @@ export default function UsersPage() {
   const [requests, setRequests] = useState<User[]>([]);
   const [ownUsername, setOwnUsername] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams(); // ⬅️ new
 
   const loadData = async () => {
     try {
@@ -49,7 +52,24 @@ export default function UsersPage() {
     }
   };
 
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   if (!token) {
+  //     router.push("/login");
+  //     return;
+  //   }
+
+  //   loadData();
+  // }, [router]);
+
   useEffect(() => {
+    const urlToken = searchParams.get('token');
+    if (urlToken) {
+      localStorage.setItem('token', urlToken);
+      // Clean the URL so token isn't visible anymore
+      router.replace("/home");
+    }
+
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -57,7 +77,7 @@ export default function UsersPage() {
     }
 
     loadData();
-  }, [router]);
+  }, [router, searchParams]); // ⬅️ added searchParams
 
   const handleSendRequest = async (username: string) => {
     try {

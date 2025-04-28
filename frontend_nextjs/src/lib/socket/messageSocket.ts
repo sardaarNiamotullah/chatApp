@@ -1,12 +1,12 @@
 import socket from "./socket";
 
 interface Message {
-    id: number;
-    text: string;
-    senderUsername: string;
-    receiverUsername: string;
-    createdAt: string;
-  }
+  id: number;
+  text: string;
+  senderUsername: string;
+  receiverUsername: string;
+  createdAt: string;
+}
 
 export const connectSocket = (username: string) => {
   if (!socket.connected) {
@@ -22,20 +22,8 @@ export const disconnectSocket = () => {
   }
 };
 
-export const onReceiveMessage = (
-  otherUsername: string,
-  currentUsername: string,
-  callback: (message: Message) => void
-) => {
-  socket.on("receive_message", (message: Message) => {
-    const isValidMessage =
-      (message.senderUsername === otherUsername && message.receiverUsername === currentUsername) ||
-      (message.receiverUsername === otherUsername && message.senderUsername === currentUsername);
-
-    if (isValidMessage) {
-      callback(message);
-    }
-  });
+export const onReceiveMessage = (callback: (message: Message) => void) => {
+  socket.on("receive_message", callback);
 };
 
 export const offReceiveMessage = () => {

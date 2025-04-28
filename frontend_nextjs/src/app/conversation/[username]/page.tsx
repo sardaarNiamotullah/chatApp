@@ -28,6 +28,20 @@ export default function ConversationPage() {
   const params = useParams();
   const username = params.username as string;
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const hasRefreshed = useRef(false);
+
+  useEffect(() => {
+    if (!hasRefreshed.current) {
+      const timer = setTimeout(() => {
+        router.refresh();
+        hasRefreshed.current = true;
+      }, 1000);
+
+      console.log("I'm just got refreshed!");
+
+      return () => clearTimeout(timer);
+    }
+  }, [router]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -45,14 +59,36 @@ export default function ConversationPage() {
       setMessages(conversation);
       setOwnUsername(profile.username);
 
-      // 🔌 Connect and register
+      // Connect socket
       connectSocket(profile.username);
 
-      // 📥 Listen for real-time messages
-      onReceiveMessage(username, profile.username, (message) => {
+      // Listen to ALL incoming messages
+      onReceiveMessage((message) => {
+        const isCurrentConversation =
+          (message.senderUsername === ownUsername && message.receiverUsername === username) ||
+          (message.senderUsername === username && message.receiverUsername === ownUsername);
+
+        if (!isCurrentConversation) return; // Not related to this conversation
+
         setMessages((prev) => {
+          // If optimistic message exists (id < 0), replace it
+          const tempIndex = prev.findIndex(
+            (m) =>
+              m.id < 0 &&
+              m.text === message.text &&
+              m.senderUsername === message.senderUsername &&
+              m.receiverUsername === message.receiverUsername
+          );
+
+          if (tempIndex !== -1) {
+            const updated = [...prev];
+            updated[tempIndex] = message;
+            return updated;
+          }
+
           const exists = prev.find((msg) => msg.id === message.id);
           if (exists) return prev;
+
           return [...prev, message];
         });
       });
@@ -64,7 +100,7 @@ export default function ConversationPage() {
       offReceiveMessage();
       disconnectSocket();
     };
-  }, [username, router]);
+  }, [username, router, ownUsername]);
 
   useEffect(() => {
     scrollToBottom();
@@ -78,7 +114,7 @@ export default function ConversationPage() {
     if (!newMessage.trim()) return;
 
     const optimisticMessage: Message = {
-      id: Date.now(),
+      id: -Date.now(), // Temporary negative ID to avoid conflict
       text: newMessage,
       senderUsername: ownUsername,
       receiverUsername: username,
