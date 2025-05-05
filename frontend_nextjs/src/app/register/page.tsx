@@ -37,7 +37,7 @@ export default function RegisterPage() {
 
       localStorage.setItem("token", data.token);
       setMessage({ type: "success", content: "Registration successful!" });
-      setTimeout(() => router.push("/home"), 1000);
+      setTimeout(() => router.push("/connection"), 0);
     } catch (err) {
       setMessage({ type: "error", content: (err as Error).message });
     }

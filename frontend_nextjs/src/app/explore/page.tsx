@@ -29,6 +29,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [requests, setRequests] = useState<User[]>([]);
   const [ownUsername, setOwnUsername] = useState<string | null>(null);
+  const [showDropdown, setShowDropdown] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams(); // ⬅️ new
 
@@ -52,22 +53,12 @@ export default function UsersPage() {
     }
   };
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (!token) {
-  //     router.push("/login");
-  //     return;
-  //   }
-
-  //   loadData();
-  // }, [router]);
-
   useEffect(() => {
-    const urlToken = searchParams.get('token');
+    const urlToken = searchParams.get("token");
     if (urlToken) {
-      localStorage.setItem('token', urlToken);
+      localStorage.setItem("token", urlToken);
       // Clean the URL so token isn't visible anymore
-      router.replace("/home");
+      router.replace("/explore");
     }
 
     const token = localStorage.getItem("token");
@@ -119,21 +110,51 @@ export default function UsersPage() {
   const handleConnectionsClick = () => {
     router.push("/connection");
   };
+  
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    router.push("/");
+  };
 
   return (
     <div className="flex flex-col h-screen bg-black text-white">
       {/* Top Navbar */}
-      <div className="flex justify-between items-center p-4 border-b border-gray-700">
+      <div className="flex justify-between items-center p-4 border-b border-gray-700 relative">
         <h1 className="text-xl font-bold">ChatApp</h1>
-        {ownUsername ? (
-          <button className="text-sm text-gray-300 border px-3 py-1 rounded hover:bg-gray-800">
-            @{ownUsername}
-          </button>
-        ) : (
-          <div className="text-sm text-gray-400 animate-pulse">Loading...</div>
-        )}
-      </div>
 
+        <div className="flex items-center gap-2 relative">
+          {ownUsername ? (
+            <>
+              <button className="text-sm text-gray-300 border px-3 py-1 rounded hover:bg-gray-800">
+                @{ownUsername}
+              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowDropdown((prev) => !prev)}
+                  className="text-gray-300 px-2 py-1 rounded hover:bg-gray-800"
+                >
+                  ☰
+                </button>
+
+                {showDropdown && (
+                  <div className="absolute right-0 mt-2 w-32 bg-gray-800 border border-gray-600 rounded shadow-lg z-10">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 hover:bg-red-600 hover:text-white text-sm"
+                    >
+                      Log Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : (
+            <div className="text-sm text-gray-400 animate-pulse">
+              Loading...
+            </div>
+          )}
+        </div>
+      </div>
       {/* User List */}
       <div className="flex-1 overflow-auto p-4">
         {/* Connection Requests Banner */}
@@ -219,7 +240,7 @@ export default function UsersPage() {
           Connetions
         </button>
         <button className="flex-1 text-center text-white font-bold">
-          Users
+          Explore Users
         </button>
       </div>
     </div>

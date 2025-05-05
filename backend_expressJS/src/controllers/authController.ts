@@ -44,7 +44,7 @@ export const googleOAuthCallback = async (
     const token = authService.generateToken(user);
 
     // Redirect user to frontend
-    res.redirect(`http://localhost:3000/home?token=${token}`);
+    res.redirect(`http://localhost:3000/connection?token=${token}`);
   } catch (error) {
     console.error(error);
     res.redirect("http://localhost:3000/login?error=internal_server_error");
