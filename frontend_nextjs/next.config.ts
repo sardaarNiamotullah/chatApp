@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
   devIndicators: false,
+  images: {
+    domains: ["lh3.googleusercontent.com"],
+  },
 };
 
 export default nextConfig;

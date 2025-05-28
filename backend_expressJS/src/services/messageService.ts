@@ -1,4 +1,6 @@
-import prisma from "../config/database";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export const sendMessage = async (
   senderUsername: string,
@@ -10,7 +12,21 @@ export const sendMessage = async (
       senderUsername,
       receiverUsername,
       text,
-      status: "SENT",
+      createdAt: new Date(),
+    },
+  });
+};
+
+export const getPendingMessages = async (username: string) => {
+  return prisma.message.findMany({
+    where: {
+      receiverUsername: username,
+      createdAt: {
+        gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
+      },
+    },
+    orderBy: {
+      createdAt: "asc",
     },
   });
 };

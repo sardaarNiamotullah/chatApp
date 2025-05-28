@@ -25,6 +25,26 @@ export const fetchOwnProfile = async () => {
   }
 };
 
+// Fetch a specific user
+export const fetchUserProfile = async (username: string) => {
+  const token = getAuthToken();
+  try {
+    const response = await fetch(`${API_URL}/users/search/${username}`, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: token ? `Bearer ${token}` : "",
+      },
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch user ${username}: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching user ${username}:`, error);
+    return null;
+  }
+};
+
 // Fetch all users
 export const fetchUsers = async () => {
   const token = getAuthToken();

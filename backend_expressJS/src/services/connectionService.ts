@@ -28,7 +28,7 @@ export const getConnections = async (currentUsername: string) => {
 
   const otherUsernames = connectionMap.map((c) => c.username);
 
-  // Step 3: Get user details
+  // Step 3: Get user details, including photo
   const users = await prisma.user.findMany({
     where: {
       username: {
@@ -39,6 +39,7 @@ export const getConnections = async (currentUsername: string) => {
       username: true,
       firstName: true,
       lastName: true,
+      photo: true, // Add photo field
     },
   });
 
@@ -49,6 +50,7 @@ export const getConnections = async (currentUsername: string) => {
       username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
+      photo: user.photo, // Include photo in the response
       status: connection?.status || null, // should always be "ACCEPTED" here
     };
   });
